@@ -1,23 +1,24 @@
 require 'gosu'
-#click/press keys to restart
-#larger amounts of money fall more rarely and slowly
+
 #click/press keys to start/reset
 
+# https://www.rubydoc.info/github/gosu/gosu/master/Gosu/Image - There are so many problems with adding draw arguments \\
+#color classes https://www.rubydoc.info/github/gosu/gosu/Gosu/Color 
+#Do this after finishing up all the logic 
 
-
-#add Z order module once you figure out what it does
-
-class Game < Gosu::Window #player warp at somepoint ; so player doesn't spawn in air
+class Game < Gosu::Window 
     def initialize
         super 1920,1080
         
         @background_image = Gosu::Image.new("media/sky_background.png", :tileable => true)
-        @player = Player.new
-        @score = 0   #keep track of money
         @money = Gosu::Image.new("media/temp.bmp")
         @large_money = Gosu::Image.new("media/templarge.bmp")
         @rocket = Gosu::Image.new("media/temprock.bmp")
-        @bomb = Gosu::Image.new("media.tempbomb.png")
+        @bomb = Gosu::Image.new("media/tempbomb.bmp") 
+
+        @player = Player.new
+        @score = 0   
+        @player.warp(960, 180)
         @game_over = false
         @font = Gosu::Font.new(20)
     end
@@ -31,11 +32,45 @@ class Game < Gosu::Window #player warp at somepoint ; so player doesn't spawn in
             @player.move_left
         end
 
-        if GOSU::button_down? Gosu::KB_Q and @rocket > 0
+        if Gosu::button_down? Gosu::KB_Q and @rocket > 0  #rocket
             @player.play_launch
             @rocket -= 1
-
         end
+
+        if rand(100) < 4 and @money.size < 50  #spawn rates
+            @money.push(Money.new)
+        end
+        
+        if rand(100) < 4 and @rocket.size < 3
+            @rocket.push(Rocket.new)
+        end
+
+        if rand(100) < 4 and @large_money.size < 10
+            @large_money.push(Large_Money.new)
+        end
+    end
+
+    def restart  #resetting the game
+        @rocket.clear
+        @money.clear
+        @large_money.clear
+        @score = 0
+        @player.warp(960, 180)
+    end
+
+
+    def game_over
+        if @game_over = true
+            @font.draw(24,546,73,Gosu::Color.argb(0xff_00ffff), mode = :default )
+            if Gosu::button_down? == KB_    #figure out what keys are wanted
+                restart
+            elsif Gosu::button_down? == KB_
+                super
+            end 
+        end
+
+
+
 
     end
 
@@ -43,25 +78,28 @@ class Game < Gosu::Window #player warp at somepoint ; so player doesn't spawn in
     def draw
         @background_image.draw(0, 0, 0) #, ZOrder::BACKGROUND
         @player.draw
-        @font.draw("Score: #{@player.score}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-        @font.draw("Number of rockets:#{@player.rocket}", 10, 10, 1.0.1.0, Gosu::Color::YELLOW)
+        @money.draw
+        @large_money.draw
+        @rocket.draw
+        # @font.draw("Score: #{@player.score}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
+        # @font.draw("Number of rockets:#{@player.rocket}", 10, 10, 1.0.1.0, Gosu::Color::YELLOW)
 
     end
 
     def button_down(id)
-        if id == Gosu::KB_ESCAPE                                                             #add module later
+        if id == Gosu::KB_ESCAPE                                                          
           @font.draw("press q to quit game : press 2 to restart: press 3 to return", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-            if id== Gosu::KB_1
-                close
-            elsif id ==    #add the 3000 milltion cases
-                Game.new
-            elsif id == 
-                super
-            end
+            # if id== Gosu::KB_1
+            #     close
+            # elsif id ==    #add the 3000 milltion cases
+            #     Game.new
+            # elsif id == 
+            #     super
+            # end
         else 
           super 
         end
-      end
+    end
 
 
 
@@ -70,11 +108,11 @@ end
 
 
 
-#add a draw function for some of these, this child was too lazy to right now
-class Player
 
+class Player
+    attr_reader :x, :y
     def initialize
-        @player = Gosu::Image.new("media/tempplay.png")
+        @image = Gosu::Image.new("media/tempplay.png")
         @x = @vel_x = @angle = 0.0
     end
 
@@ -83,10 +121,14 @@ class Player
         @vel_y +=Gosu.offset_y(@angle, 0.5)
     end
 
+    def warp(x,y)
+        @x,@y = x, y
+    end
+
     def move_right
         # @angle = 4.5
         @x += @vel_x
-        @x %= 1152
+        @x %= 1920
         @vel_x *= 0.3
     end
 
@@ -97,19 +139,26 @@ class Player
         @vel_x *= 0.3
     end
 
-    def play_launch #player needs to drop back down
+    def play_launch #player needs to drop back down - done
         timecounter = 0
         while timecounter < 4
             @y+=vel_y
             1.second
             timecounter += 4
         end
+
+        if timecounter == 4
+            until @y = 180 do 
+                @y -= vel_y
+            end
+            
+            timecounter = 0 
+        end
     end
 
-    def draw
-        @player.draw
-        @background_image.draw(0, 0, 0)
-
+    def draw #thinking that it needs to take in stuff   #variable name problemo # with the 0's it's getting a Nil class argumebt
+        @image.draw(@x,@y,1)
+        @background_image.draw(0,0,0)
     end
 
 
@@ -128,6 +177,11 @@ class Money  #add y velocity that goes down
         until @y == 0 # or the player collects the money 
             @y -= vel_y
         end 
+    end
+
+    def draw
+        @image.draw
+        @background_image.draw(0, 0, 0)
     end
 
 
@@ -153,11 +207,20 @@ class Bomb
 
 
     def initialize
+        @image = Gosu::Image.new("media/tempbomb.bmp")
 
     end
 
     def drop
+        until @y == 0 # or the player collects the money 
+            @y -= vel_y
+        end 
+    end
 
+
+    def draw 
+        @image.draw
+        @background_image.draw(0, 0, 0)
 
     end
 
@@ -183,7 +246,6 @@ class Bomb
 end
 
 
-
 class Large_Money #alter spawn rates
     attr_reader :x, :y
 
@@ -197,6 +259,13 @@ class Large_Money #alter spawn rates
         until @y == 0 # or the player collects the money 
             @y -= vel_y
         end 
+    end
+
+    def draw
+        @image.draw
+        @background_image.draw(0, 0, 0)
+
+
     end
 
 
@@ -221,7 +290,6 @@ class Rocket  #alter spawn rates
         @image = Gosu::Image.new("media/temprocket.png")
         @x = rand*1920
         @y = rand*1080
-
     end
     
     
@@ -240,24 +308,17 @@ class Rocket  #alter spawn rates
 
     def draw
         @rocket.draw
-        @background_image.draw(0, 0, 0
+        @background_image.draw(0, 0, 0)
     end
 
 
 end
 
 
-class game_over
-
-   if @game_over = true
-        @font.draw("You have failed, press q to exit, press esc to close") #add restart and close otions
-    end
-
-
-
-
+module ZOrder
+    BACKGROUND, BOMB, PLAYER, UI = *0..3  #large money #money #rocket
 end
-
+  
 
 Game.new.show
 
