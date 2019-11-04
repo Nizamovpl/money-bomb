@@ -1,22 +1,22 @@
 require 'gosu'
 
 #click/press keys to start/reset
-
+#ckeck spelling errors
 # https://www.rubydoc.info/github/gosu/gosu/master/Gosu/Image - There are so many problems with adding draw arguments \\
 #color classes https://www.rubydoc.info/github/gosu/gosu/Gosu/Color 
 #Do this after finishing up all the logic 
 #add pausing mechanism once everything else is sorted out
 
-##draw(x, y, z, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+#draw(x, y, z, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
 class Game < Gosu::Window 
     def initialize
         super 1920,1080
         
         @background_image = Gosu::Image.new("media/sky_background.png", :tileable => true)
-        @money = Gosu::Image.new("media/temp.bmp")
-        @large_money = Gosu::Image.new("media/templarge.bmp")
-        @rocket = Gosu::Image.new("media/temprock.bmp")
-        @bomb = Gosu::Image.new("media/tempbomb.bmp") 
+        @money = Money.new
+        @large_money = Lager_Money.new
+        @rocket = Rocket.new
+        @bomb = Bomb.new 
 
         @player = Player.new
         @score = 0   
@@ -63,13 +63,15 @@ class Game < Gosu::Window
 
 
     def game_over
-        if @game_over = true
+        if @game_over == true
             @font.draw("press q to quit game : press 2 to restart: press 3 to return", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-            if Gosu::button_down? == KB_2    
+            if Gosu::button_down? == KB_2 
                 restart
-            elsif Gosu::button_down? == KB_
+            elsif Gosu::button_down? == KB_Q
                 super
-            end 
+            elsif Gosu::button_down? == KB_3
+                @font.clear
+            end
         end
 
 
@@ -85,7 +87,7 @@ class Game < Gosu::Window
         @large_money.draw
         @rocket.draw
         @font.draw("Score: #{@player.score}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-        @font.draw("Number of rockets:#{@player.rocket}", 10, 10,ZOrder::UI, 1.0.1.0, Gosu::Color::YELLOW)
+        @font.draw("Number of rockets:#{@player.rocket}", 10, 10,ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
 
     end
 
@@ -143,7 +145,7 @@ class Player
         @vel_x *= 0.3
     end
 
-    def play_launch #player needs to drop back down - done
+    def play_launch 
         timecounter = 0
         while timecounter < 4
             @y+=vel_y
@@ -152,7 +154,7 @@ class Player
         end
 
         if timecounter == 4
-            until @y = 180 do 
+            until @y == 180 do 
                 @y -= vel_y
             end
             
@@ -160,15 +162,14 @@ class Player
         end
     end
 
-    def draw #thinking that it needs to take in stuff   #variable name problemo # with the 0's it's getting a Nil class argumebt
+    def draw 
         @image.draw(@x,@y,1)
-        @background_image.draw(0,0,0)
     end
 
 
 end
 
-class Money  #add y velocity that goes down
+class Money  
     attr_reader :x, :y
 
     def initialize
@@ -184,7 +185,7 @@ class Money  #add y velocity that goes down
     end
 
     def draw
-        @image.draw
+        @image.draw(@x, @y, 1)
         @background_image.draw(0, 0, 0)
     end
 
@@ -225,7 +226,7 @@ class Bomb
 
 
     def draw 
-        @image.draw
+        @image.draw(@x, @y, 1)
         @background_image.draw(0, 0, 0)
 
     end
@@ -268,7 +269,7 @@ class Large_Money #alter spawn rates
     end
 
     def draw
-        @image.draw
+        @image.draw(@x, @y, 1)
         @background_image.draw(0, 0, 0)
 
 
@@ -313,7 +314,7 @@ class Rocket  #alter spawn rates
 
 
     def draw
-        @rocket.draw
+        @image.draw(@x, @y, 1)
         @background_image.draw(0, 0, 0)
     end
 
