@@ -14,7 +14,7 @@ class Game < Gosu::Window
         
         @background_image = Gosu::Image.new("media/sky_background.png", :tileable => true)
         @money = Money.new
-        @large_money = Lager_Money.new
+        @large_money = Large_Money.new
         @rocket = Rocket.new
         @bomb = Bomb.new 
 
@@ -38,6 +38,17 @@ class Game < Gosu::Window
             @player.play_launch
             @rocket -= 1
         end
+        
+        if Gosu::button_down? == KB_2 && @game_over == true
+            restart
+        end
+
+        if Gosu::button_down? == KB_Q && @game_over == true
+            super
+        end
+
+        if @game_over == true &&  #finish working on
+
 
         if rand(100) < 4 and @money.size < 50  #spawn rates
             @money.push(Money.new)
@@ -47,9 +58,10 @@ class Game < Gosu::Window
             @rocket.push(Rocket.new)
         end
 
-        if rand(100) < 4 and @large_money.size < 10
+        if rand(100) < 4 and @large_money.size < 700
             @large_money.push(Large_Money.new)
         end
+
     end
 
     def restart #resetting the game
@@ -65,7 +77,7 @@ class Game < Gosu::Window
     def game_over
         if @game_over == true
             @font.draw("press q to quit game : press 2 to restart: press 3 to return", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-            if Gosu::button_down? == KB_2 
+            if Gosu::button_down? == KB_2 #hese aren't in the correct spot ; figure out this into
                 restart
             elsif Gosu::button_down? == KB_Q
                 super
@@ -173,7 +185,7 @@ class Money
     attr_reader :x, :y
 
     def initialize
-        @image = Gosu::Image.new("media/temp.png")
+        @image = Gosu::Image.new("media/temp.bmp")
         @x = rand*1920
         @y = 1080
     end
@@ -186,7 +198,7 @@ class Money
 
     def draw
         @image.draw(@x, @y, 1)
-        @background_image.draw(0, 0, 0)
+        #@background_image.draw(1, 0, 0)
     end
 
 
@@ -257,7 +269,7 @@ class Large_Money #alter spawn rates
     attr_reader :x, :y
 
     def initialize
-        @image = Gosu::Image.new("media/templarge.png")
+        @image = Gosu::Image.new("media/templarge.bmp")
         @x = rand*1920
         @y = 1080
     end
@@ -270,7 +282,7 @@ class Large_Money #alter spawn rates
 
     def draw
         @image.draw(@x, @y, 1)
-        @background_image.draw(0, 0, 0)
+        #@background_image.draw(0, 0, 0)
 
 
     end
@@ -294,7 +306,7 @@ class Rocket  #alter spawn rates
     attr_reader :x, :y
 
     def initialize
-        @image = Gosu::Image.new("media/temprocket.png")
+        @image = Gosu::Image.new("media/temprock.bmp")
         @x = rand*1920
         @y = rand*1080
     end
@@ -315,7 +327,7 @@ class Rocket  #alter spawn rates
 
     def draw
         @image.draw(@x, @y, 1)
-        @background_image.draw(0, 0, 0)
+        #@background_image.draw(0, 0, 0)
     end
 
 
