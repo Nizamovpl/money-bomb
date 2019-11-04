@@ -5,7 +5,9 @@ require 'gosu'
 # https://www.rubydoc.info/github/gosu/gosu/master/Gosu/Image - There are so many problems with adding draw arguments \\
 #color classes https://www.rubydoc.info/github/gosu/gosu/Gosu/Color 
 #Do this after finishing up all the logic 
+#add pausing mechanism once everything else is sorted out
 
+##draw(x, y, z, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
 class Game < Gosu::Window 
     def initialize
         super 1920,1080
@@ -50,7 +52,8 @@ class Game < Gosu::Window
         end
     end
 
-    def restart  #resetting the game
+    def restart #resetting the game
+        @game_over = false  
         @rocket.clear
         @money.clear
         @large_money.clear
@@ -61,8 +64,8 @@ class Game < Gosu::Window
 
     def game_over
         if @game_over = true
-            @font.draw(24,546,73,Gosu::Color.argb(0xff_00ffff), mode = :default )
-            if Gosu::button_down? == KB_    #figure out what keys are wanted
+            @font.draw("press q to quit game : press 2 to restart: press 3 to return", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
+            if Gosu::button_down? == KB_2    
                 restart
             elsif Gosu::button_down? == KB_
                 super
@@ -76,26 +79,27 @@ class Game < Gosu::Window
 
 
     def draw
-        @background_image.draw(0, 0, 0) #, ZOrder::BACKGROUND
+        @background_image.draw(0, 0, ZOrder::BACKGROUND) #, ZOrder::BACKGROUND
         @player.draw
         @money.draw
         @large_money.draw
         @rocket.draw
-        # @font.draw("Score: #{@player.score}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-        # @font.draw("Number of rockets:#{@player.rocket}", 10, 10, 1.0.1.0, Gosu::Color::YELLOW)
+        @font.draw("Score: #{@player.score}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
+        @font.draw("Number of rockets:#{@player.rocket}", 10, 10,ZOrder::UI, 1.0.1.0, Gosu::Color::YELLOW)
 
     end
 
     def button_down(id)
-        if id == Gosu::KB_ESCAPE                                                          
+        if id == Gosu::KB_ESCAPE
+          @font = Gosu::Font.new(20)                                                       
           @font.draw("press q to quit game : press 2 to restart: press 3 to return", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-            # if id== Gosu::KB_1
-            #     close
-            # elsif id ==    #add the 3000 milltion cases
-            #     Game.new
-            # elsif id == 
-            #     super
-            # end
+            if id== Gosu::KB_Q
+                close
+            elsif id ==KB_2    #add the 3000 milltion cases
+                restart
+            elsif id == KB_3
+                @font.clear
+            end
         else 
           super 
         end
@@ -208,6 +212,8 @@ class Bomb
 
     def initialize
         @image = Gosu::Image.new("media/tempbomb.bmp")
+        @x = rand*1920
+        @y = 1080
 
     end
 
@@ -294,7 +300,7 @@ class Rocket  #alter spawn rates
     
     
     def rocket_collection
-        rocket.reject! do |rocket| #reject loop makes the money disappear when gone
+        rocket.reject! do |rocket| #reject loop makes the money disappear when gone #test to see whether there are multiple rockets spawning
             if Gosu.distance(@x, @y ,rocket.x, rocket.y) < 3
               @rocket += 1
               true
