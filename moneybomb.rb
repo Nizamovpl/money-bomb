@@ -1,7 +1,10 @@
 require 'gosu'
+# I forgot to commit the file ; I finished it last night
+#sorry I coulodn't commit it until 6 PM I had a job interview
+#anyways this isn't done, but I haven't finished all the buggs though I was so close
 
 #click/press keys to start/reset
-#ckeck spelling errors
+#check spelling errors
 # https://www.rubydoc.info/github/gosu/gosu/master/Gosu/Image - There are so many problems with adding draw arguments \\
 #color classes https://www.rubydoc.info/github/gosu/gosu/Gosu/Color 
 #Do this after finishing up all the logic 
@@ -13,6 +16,7 @@ class Game < Gosu::Window
         super 1920,1080
         
         @background_image = Gosu::Image.new("media/sky_background.png", :tileable => true)
+        @background_image = Gosu::Image.new("media/menu.png")
         @money = Money.new
         @large_money = Large_Money.new
         @rocket = Rocket.new
@@ -47,7 +51,8 @@ class Game < Gosu::Window
             super
         end
 
-        if @game_over == true &&  #finish working on
+        
+            
 
 
         if rand(100) < 4 and @money.size < 50  #spawn rates
@@ -74,24 +79,6 @@ class Game < Gosu::Window
     end
 
 
-    def game_over
-        if @game_over == true
-            @font.draw("press q to quit game : press 2 to restart: press 3 to return", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
-            if Gosu::button_down? == KB_2 #hese aren't in the correct spot ; figure out this into
-                restart
-            elsif Gosu::button_down? == KB_Q
-                super
-            elsif Gosu::button_down? == KB_3
-                @font.clear
-            end
-        end
-
-
-
-
-    end
-
-
     def draw
         @background_image.draw(0, 0, ZOrder::BACKGROUND) #, ZOrder::BACKGROUND
         @player.draw
@@ -100,6 +87,10 @@ class Game < Gosu::Window
         @rocket.draw
         @font.draw("Score: #{@player.score}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
         @font.draw("Number of rockets:#{@player.rocket}", 10, 10,ZOrder::UI, 1.0, 1.0, Gosu::Color::YELLOW)
+
+        if @game_over == true
+            @background_image = Gosu::Image.new(0,0,Zorder::MENU)
+        end
 
     end
 
@@ -335,7 +326,7 @@ end
 
 
 module ZOrder
-    BACKGROUND, BOMB, PLAYER, UI = *0..3  #large money #money #rocket
+    BACKGROUND, BOMB, PLAYER, UI = *0..3, #MENU #large money #money #rocket
 end
   
 
